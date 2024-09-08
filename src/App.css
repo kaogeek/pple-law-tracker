@@ -25,6 +25,20 @@
     font-style: lighter;
 }
 
+@font-face {
+    font-family: "Pracharath-Regular";
+    src: url("./fonts/Pracharath-Regular.otf") format("opentype");
+    font-weight: 400;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: "Pracharath-Bold";
+    src: url("./fonts/Pracharath-Bold.otf") format("opentype");
+    font-weight: 600;
+    font-style: bold;
+}
+
 .app {
-    font-family: "Anakotmai-Medium";
+    font-family: "Anakotmai-Medium", sans-serif;
 }

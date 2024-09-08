@@ -5,7 +5,15 @@ module.exports = {
     "./src/**/*.js",
   ],
   theme: {
-    extend: {},
+    extend: {
+      colors: {
+        'pple-blue': '#002b49',
+        'pple-orange': '#ff6a13'
+      },
+      fontFamily: {
+        pracharatbold: ['"Pracharath-Bold"', 'sans-serif'],
+      },
+    },
   },
   plugins: [],
 }
