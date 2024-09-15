@@ -28,67 +28,24 @@ const statusLabels = [
   "ลงนามพระปรมาภิไธย/ประกาศใช้",
 ];
 
-const getStatusColor = (status, stage) => {
-  if (stage === "proposed") {
-    if (status === 1) {
-      return "bg-blue-500";
-    } else {
-      return "bg-gray-300";
-    }
-  }
-
-  if (status === 1) {
-    // Check the stage and return the appropriate color
-    switch (stage) {
-      case "proposed":
-        return "bg-yellow-500"; // Blue for proposed
-      case "working":
-        return "bg-yellow-500"; // Yellow for working
-      case "paused":
-        return "bg-red-500"; // Red for paused
-      case "done":
-        return "bg-green-500"; // Green for done
-      default:
-        return "bg-gray-300"; // Default to gray if the stage is unknown
-    }
-  } else if (status === 2) {
-    return "bg-black";
-  } else {
-    return "bg-gray-300"; // Grey if status is 0
-  }
-};
-
-const getStageColor = (stage) => {
-  switch (stage) {
-    case "proposed":
-      return "text-blue-500"; // Blue for proposed
-    case "working":
-      return "text-yellow-500"; // Yellow for working
-    case "paused":
-      return "text-red-500"; // Red for paused
-    case "done":
-      return "text-green-500"; // Green for done
+const getStatusColor = (status) => {
+  switch (status) {
+    case 1:
+      return "bg-green-500"; // Green
+    case 2:
+      return "bg-red-500"; // Red
+    case 3:
+      return "bg-yellow-500"; // Yellow
+    case 4:
+      return "bg-black"; // Black
+    case 5:
+      return "bg-blue-500"; // Blue
     default:
-      return "text-gray-300"; // Default to gray if the stage is unknown
+      return "bg-gray-300"; // Grey
   }
 };
 
-const getStatusText = (stage, text) => {
-  switch (stage) {
-    case "proposed":
-      return text; // Blue for proposed
-    case "working":
-      return "รอ" + text; // Yellow for working
-    case "paused":
-      return "ถูกปัดตกใน" + text; // Red for paused
-    case "done":
-      return text; // Green for done
-    default:
-      return "ไม่มีข้อมูล"; // Default to gray if the stage is unknown
-  }
-};
-
-const DraftLawsTable = () => {
+const AppLawsTable = () => {
   const [searchTerm, setSearchTerm] = useState(""); // State to hold the search input
 
   // Sort and filter data by title in Thai alphabetical order and search term
@@ -125,29 +82,20 @@ const DraftLawsTable = () => {
             />
           </div>
           <div className="flex justify-end items-center">
-            {/* <div
+            <div
               className={`h-4 ml-2 mr-1 w-[35px] rounded ${getStatusColor(5)}`}
             ></div>
-            <div>ยื่นเข้าสภา</div> */}
+            <div>ยื่นเข้าสภา</div>
             <div
-              className={`h-4 ml-2 mr-1 w-[35px] rounded ${getStatusColor(
-                1,
-                "working"
-              )}`}
+              className={`h-4 ml-2 mr-1 w-[35px] rounded ${getStatusColor(3)}`}
             ></div>
             <div>ดำเนินการ</div>
             <div
-              className={`h-4 ml-2 mr-1 w-[35px] rounded ${getStatusColor(
-                1,
-                "paused"
-              )}`}
+              className={`h-4 ml-2 mr-1 w-[35px] rounded ${getStatusColor(2)}`}
             ></div>
             <div>ปัดตก</div>
             <div
-              className={`h-4 ml-2 mr-1 w-[35px] rounded ${getStatusColor(
-                1,
-                "done"
-              )}`}
+              className={`h-4 ml-2 mr-1 w-[35px] rounded ${getStatusColor(1)}`}
             ></div>
             <div>ผ่าน</div>
           </div>
@@ -183,8 +131,7 @@ const DraftLawsTable = () => {
                   <td key={idx} className="px-1 py-2 text-center w-[100px]">
                     <div
                       className={`h-4 w-full rounded-3xl ${getStatusColor(
-                        status,
-                        item.stage // Pass stage here
+                        status
                       )}`}
                     ></div>
                   </td>
@@ -193,7 +140,6 @@ const DraftLawsTable = () => {
             ))}
           </tbody>
         </table>
-        <div className="flex justify-end p-2">*สามารถข้ามขั้นตอนนี้ได้</div>
       </div>
 
       {/* Mobile View */}
@@ -207,54 +153,24 @@ const DraftLawsTable = () => {
             onChange={(e) => setSearchTerm(e.target.value)} // Update searchTerm when typing
           />
         </div>
-        {filteredData.map((item) => {
-          // Find the index of the last non-zero status
-          const lastNonZeroIndex = item.status.findLastIndex(
-            (status) => status !== 0
-          );
-
-          // Get the corresponding label from statusLabels
-          const lastStatusLabel =
-            lastNonZeroIndex !== -1
-              ? statusLabels[lastNonZeroIndex]
-              : "Unknown Status";
-
-          return (
-            <div key={item.id} className="mb-4 border-b pb-2">
-              <h2 className="text-lg font-semibold">{item.title}</h2>
-              <div className="text-sm flex">
-                <div className="text-black">ผู้เสนอ:&nbsp;</div>
-                <div className="text-gray-500"> {item.name}</div>
-              </div>
-
-              {/* Display the last non-zero status label */}
-              <div className="text-sm flex">
-                <div className="text-black">สถานะล่าสุด:&nbsp;</div>
-                <div className={getStageColor(item.stage)}>
-                  {getStatusText(item.stage, lastStatusLabel)}
-                </div>
-                {/* <div>
-                  <a href={item.url}>อ่านร่างกฎหมาย</a>
-                </div> */}
-              </div>
-
-              <div className="grid grid-cols-10 gap-1 mt-2">
-                {item.status.map((status, idx) => (
-                  <div
-                    key={idx}
-                    className={`h-4 rounded ${getStatusColor(
-                      status,
-                      item.stage
-                    )}`}
-                  ></div>
-                ))}
-              </div>
+        {filteredData.map((item) => (
+          <div key={item.id} className="mb-4 border-b pb-2">
+            <h2 className="text-lg font-semibold">{item.title}</h2>
+            <div className="text-sm text-gray-500">{item.name}</div>{" "}
+            <div className="grid grid-cols-10 gap-1 mt-2">
+              {item.status.map((status, idx) => (
+                <div
+                  key={idx}
+                  className={`h-4 rounded ${getStatusColor(status)}`}
+                ></div>
+              ))}
             </div>
-          );
-        })}
+          </div>
+        ))}
       </div>
+      <div className="flex justify-end p-2">*สามารถข้ามขั้นตอนนี้ได้</div>
     </div>
   );
 };
 
-export default DraftLawsTable;
+export default AppLawsTable;

@@ -4,10 +4,14 @@
 
 .app-header {
     padding: 10px;
-    background-color: antiquewhite;
+    box-shadow: 0 2px 4px 0 rgba(0, 0, 0, .2);
     height: 60px;
     display: flex;
     align-items: center;
+    position: sticky;
+    top: 0;
+    background-color: white;
+    z-index: 1000;
 }
 
 .app-header-logo {

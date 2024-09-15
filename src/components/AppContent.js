@@ -1,6 +1,6 @@
 import "./AppContent.css";
 // import AppLawItem from "./AppLawItem.js";
-import DraftLawsTable from "./DraftLawsTable.js";
+import AppLawsTable from "./AppLawsTable.js";
 import lawFile from "../assets/law.json"
 
 const lawLists = lawFile;
@@ -14,7 +14,7 @@ function AppContent() {
   return (
     <div className="p-4">
       {/* <div className="text-2xl">สำรวจร่างกฎหมายพรรคประชาชน</div> */}
-      <DraftLawsTable />
+      <AppLawsTable />
     </div>
   );
 }
