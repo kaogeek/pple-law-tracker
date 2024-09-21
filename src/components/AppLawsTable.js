@@ -29,32 +29,19 @@ const statusLabels = [
 ];
 
 const getStatusColor = (status, stage) => {
-  if (stage === "proposed") {
-    if (status === 1) {
-      return "bg-blue-500";
-    } else {
-      return "bg-gray-300";
-    }
-  }
+  // 1 for yes, 2 for working, 3 for paused
 
-  if (status === 1) {
-    // Check the stage and return the appropriate color
-    switch (stage) {
-      case "proposed":
-        return "bg-yellow-500"; // Blue for proposed
-      case "working":
-        return "bg-yellow-500"; // Yellow for working
-      case "paused":
-        return "bg-red-500"; // Red for paused
-      case "done":
-        return "bg-green-500"; // Green for done
-      default:
-        return "bg-gray-300"; // Default to gray if the stage is unknown
-    }
-  } else if (status === 2) {
-    return "bg-black";
-  } else {
-    return "bg-gray-300"; // Grey if status is 0
+  switch (status) {
+    case 1:
+      return "bg-green-500"; // Green for done
+    case 2:
+      return "bg-yellow-500"; // Yellow for working
+    case 3:
+      return "bg-red-500"; // Red for paused
+    case 4:
+      return "bg-white border border-green"; // Red for paused
+    default:
+      return "bg-gray-300"; // Default to gray if the stage is unknown
   }
 };
 
@@ -110,7 +97,10 @@ const AppLawsTable = () => {
       {/* Table Wrapper */}
       <div
         className="hidden lg:block"
-        style={{ maxHeight: "calc(100% - 285px)", overflowY: "auto" }}
+        style={{
+          maxHeight: "calc(100vh - 200px)", // Adjusted for navbar and header height
+          overflowY: "auto",
+        }}
       >
         {/* search area and description */}
         <div className="flex justify-between items-center py-2">
@@ -125,20 +115,23 @@ const AppLawsTable = () => {
             />
           </div>
           <div className="flex justify-end items-center">
-            {/* <div
-              className={`h-4 ml-2 mr-1 w-[35px] rounded ${getStatusColor(5)}`}
-            ></div>
-            <div>ยื่นเข้าสภา</div> */}
             <div
               className={`h-4 ml-2 mr-1 w-[35px] rounded ${getStatusColor(
-                1,
+                4,
+                null
+              )}`}
+            ></div>
+            <div>ข้าม</div>
+            <div
+              className={`h-4 ml-2 mr-1 w-[35px] rounded ${getStatusColor(
+                2,
                 "working"
               )}`}
             ></div>
             <div>ดำเนินการ</div>
             <div
               className={`h-4 ml-2 mr-1 w-[35px] rounded ${getStatusColor(
-                1,
+                3,
                 "paused"
               )}`}
             ></div>
@@ -152,11 +145,12 @@ const AppLawsTable = () => {
             <div>ผ่าน</div>
           </div>
         </div>
+
+        {/* Table Content */}
         <table className="min-w-full table-auto border-collapse border-spacing-0">
-          <thead className="bg-gray-100 sticky top-0 z-10">
+          <thead className="bg-gray-100 sticky top-0 z-20">
             <tr>
               <th className="px-4 py-2 w-[600px] text-sm">หัวข้อ</th>
-              {/* Status Columns */}
               {statusLabels.map((label, index) => (
                 <th
                   key={index}
@@ -169,22 +163,17 @@ const AppLawsTable = () => {
           </thead>
           <tbody>
             {filteredData.map((item) => (
-              <tr key={item.id} className="bg-white border-b">
-                {/* Title and Subtitle */}
+              <tr key={item.no} className="bg-white border-b">
                 <td className="px-4 py-2">
-                  <div className="font-bold">{item.title}</div>{" "}
-                  {/* Main title */}
-                  <div className="text-sm text-gray-500">{item.name}</div>{" "}
-                  {/* Subtitle */}
+                  <div className="font-bold">{item.title}</div>
+                  <div className="text-sm text-gray-500">{item.name}</div>
                 </td>
-
-                {/* Render status with color */}
                 {item.status.map((status, idx) => (
                   <td key={idx} className="px-1 py-2 text-center w-[100px]">
                     <div
                       className={`h-4 w-full rounded-3xl ${getStatusColor(
                         status,
-                        item.stage // Pass stage here
+                        item.stage
                       )}`}
                     ></div>
                   </td>
@@ -193,6 +182,7 @@ const AppLawsTable = () => {
             ))}
           </tbody>
         </table>
+
         <div className="flex justify-end p-2">*สามารถข้ามขั้นตอนนี้ได้</div>
       </div>
 
@@ -208,36 +198,27 @@ const AppLawsTable = () => {
           />
         </div>
         {filteredData.map((item) => {
-          // Find the index of the last non-zero status
           const lastNonZeroIndex = item.status.findLastIndex(
             (status) => status !== 0
           );
-
-          // Get the corresponding label from statusLabels
           const lastStatusLabel =
             lastNonZeroIndex !== -1
               ? statusLabels[lastNonZeroIndex]
               : "Unknown Status";
 
           return (
-            <div key={item.id} className="mb-4 border-b pb-2">
+            <div key={item.no} className="mb-4 border-b pb-2">
               <h2 className="text-lg font-semibold">{item.title}</h2>
               <div className="text-sm flex">
                 <div className="text-black">ผู้เสนอ:&nbsp;</div>
                 <div className="text-gray-500"> {item.name}</div>
               </div>
-
-              {/* Display the last non-zero status label */}
               <div className="text-sm flex">
                 <div className="text-black">สถานะล่าสุด:&nbsp;</div>
                 <div className={getStageColor(item.stage)}>
                   {getStatusText(item.stage, lastStatusLabel)}
                 </div>
-                {/* <div>
-                  <a href={item.url}>อ่านร่างกฎหมาย</a>
-                </div> */}
               </div>
-
               <div className="grid grid-cols-10 gap-1 mt-2">
                 {item.status.map((status, idx) => (
                   <div
