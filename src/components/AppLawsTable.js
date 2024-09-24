@@ -1,18 +1,8 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import lawFile from "../assets/law.json";
 
 // Sample data with 10 status stages for each item
 const data = lawFile;
-
-// 6 bigbang
-// const category = [
-//   "การศึกษาตกยุค",
-//   "คุณภาพชีวิตโลกที่สาม",
-//   "เผด็จการซ่อนรูป",
-//   "ภาคเกษตรถูกแช่แข็ง",
-//   "รัฐล้าหลัง",
-//   "เศรษฐกิจปิดโอกาส",
-// ];
 
 // 10 Status Labels
 const statusLabels = [
@@ -28,9 +18,22 @@ const statusLabels = [
   "ลงนามพระปรมาภิไธย/ประกาศใช้",
 ];
 
-const getStatusColor = (status, stage) => {
-  // 1 for yes, 2 for working, 3 for paused
+// Function to get the status type based on the last non-zero value in the array
+const getLawStatus = (statusArray) => {
+  const lastNonZeroIndex = statusArray.findLastIndex((status) => status !== 0);
+  const lastStatus = statusArray[lastNonZeroIndex];
 
+  if (lastStatus === 2) {
+    return "ongoing"; // Law is ongoing
+  } else if (lastStatus === 3) {
+    return "stopped"; // Law is stopped
+  } else if (lastStatus === 1 && lastNonZeroIndex === statusArray.length - 1) {
+    return "passed"; // Law is passed
+  }
+  return "other"; // For any other cases
+};
+
+const getStatusColor = (status) => {
   switch (status) {
     case 1:
       return "bg-green-500"; // Green for done
@@ -39,7 +42,7 @@ const getStatusColor = (status, stage) => {
     case 3:
       return "bg-red-500"; // Red for paused
     case 4:
-      return "bg-white border border-green"; // Red for paused
+      return "bg-white border border-green";
     default:
       return "bg-gray-300"; // Default to gray if the stage is unknown
   }
@@ -77,12 +80,50 @@ const getStatusText = (stage, text) => {
 
 const AppLawsTable = () => {
   const [searchTerm, setSearchTerm] = useState(""); // State to hold the search input
+  const [filter, setFilter] = useState("all"); // State to hold the current filter
+  const [counts, setCounts] = useState({
+    all: 0,
+    ongoing: 0,
+    stopped: 0,
+    passed: 0,
+  });
+
+  // Calculate counts for each filter category
+  useEffect(() => {
+    const allCount = data.length;
+    const ongoingCount = data.filter(
+      (item) => getLawStatus(item.status) === "ongoing"
+    ).length;
+    const stoppedCount = data.filter(
+      (item) => getLawStatus(item.status) === "stopped"
+    ).length;
+    const passedCount = data.filter(
+      (item) => getLawStatus(item.status) === "passed"
+    ).length;
+
+    setCounts({
+      all: allCount,
+      ongoing: ongoingCount,
+      stopped: stoppedCount,
+      passed: passedCount,
+    });
+  }, []);
+
+  // Function to handle filter change
+  const handleFilterChange = (newFilter) => {
+    setFilter(newFilter);
+  };
 
   // Sort and filter data by title in Thai alphabetical order and search term
   const filteredData = data
     .filter((item) =>
       item.title.toLowerCase().includes(searchTerm.toLowerCase())
     )
+    .filter((item) => {
+      if (filter === "all") return true; // Show all if filter is 'all'
+      const lawStatus = getLawStatus(item.status);
+      return lawStatus === filter;
+    })
     .sort((a, b) => a.title.localeCompare(b.title, "th"));
 
   return (
@@ -114,35 +155,41 @@ const AppLawsTable = () => {
               onChange={(e) => setSearchTerm(e.target.value)} // Update searchTerm when typing
             />
           </div>
-          <div className="flex justify-end items-center">
-            <div
-              className={`h-4 ml-2 mr-1 w-[35px] rounded ${getStatusColor(
-                4,
-                null
-              )}`}
-            ></div>
-            <div>ข้าม</div>
-            <div
-              className={`h-4 ml-2 mr-1 w-[35px] rounded ${getStatusColor(
-                2,
-                "working"
-              )}`}
-            ></div>
-            <div>ดำเนินการ</div>
-            <div
-              className={`h-4 ml-2 mr-1 w-[35px] rounded ${getStatusColor(
-                3,
-                "paused"
-              )}`}
-            ></div>
-            <div>ปัดตก</div>
-            <div
-              className={`h-4 ml-2 mr-1 w-[35px] rounded ${getStatusColor(
-                1,
-                "done"
-              )}`}
-            ></div>
-            <div>ผ่าน</div>
+          <div className="flex space-x-2">
+            <button
+              className={`px-2 py-2 rounded ${
+                filter === "all" ? "bg-blue-500 text-white" : "bg-gray-200"
+              }`}
+              onClick={() => handleFilterChange("all")}
+            >
+              ทั้งหมด ({counts.all})
+            </button>
+            <button
+              className={`px-2 py-2 rounded ${
+                filter === "ongoing"
+                  ? "bg-yellow-500 text-white"
+                  : "bg-gray-200"
+              }`}
+              onClick={() => handleFilterChange("ongoing")}
+            >
+              กำลังดำเนินการ ({counts.ongoing})
+            </button>
+            <button
+              className={`px-2 py-2 rounded ${
+                filter === "stopped" ? "bg-red-500 text-white" : "bg-gray-200"
+              }`}
+              onClick={() => handleFilterChange("stopped")}
+            >
+              ถูกปัดตก ({counts.stopped})
+            </button>
+            <button
+              className={`px-2 py-2 rounded ${
+                filter === "passed" ? "bg-green-500 text-white" : "bg-gray-200"
+              }`}
+              onClick={() => handleFilterChange("passed")}
+            >
+              ผ่านแล้ว ({counts.passed})
+            </button>
           </div>
         </div>
 
@@ -197,6 +244,41 @@ const AppLawsTable = () => {
             onChange={(e) => setSearchTerm(e.target.value)} // Update searchTerm when typing
           />
         </div>
+        <div className="flex space-x-2 mb-4">
+          <button
+            className={`px-2 py-2 rounded text-sm ${
+              filter === "all" ? "bg-blue-500 text-white" : "bg-gray-200"
+            }`}
+            onClick={() => handleFilterChange("all")}
+          >
+            ทั้งหมด ({counts.all})
+          </button>
+          <button
+            className={`px-2 py-2 rounded text-sm ${
+              filter === "ongoing" ? "bg-yellow-500 text-white" : "bg-gray-200"
+            }`}
+            onClick={() => handleFilterChange("ongoing")}
+          >
+            ดำเนินการ ({counts.ongoing})
+          </button>
+          <button
+            className={`px-2 py-2 rounded text-sm ${
+              filter === "stopped" ? "bg-red-500 text-white" : "bg-gray-200"
+            }`}
+            onClick={() => handleFilterChange("stopped")}
+          >
+            ปัดตก ({counts.stopped})
+          </button>
+          <button
+            className={`px-2 py-2 rounded text-sm ${
+              filter === "passed" ? "bg-green-500 text-white" : "bg-gray-200"
+            }`}
+            onClick={() => handleFilterChange("passed")}
+          >
+            ประกาศใช้ ({counts.passed})
+          </button>
+        </div>
+
         {filteredData.map((item) => {
           const lastNonZeroIndex = item.status.findLastIndex(
             (status) => status !== 0
@@ -211,7 +293,7 @@ const AppLawsTable = () => {
               <h2 className="text-lg font-semibold">{item.title}</h2>
               <div className="text-sm flex">
                 <div className="text-black">ผู้เสนอ:&nbsp;</div>
-                <div className="text-gray-500"> {item.name}</div>
+                <div className="text-gray-500">{item.name}</div>
               </div>
               <div className="text-sm flex">
                 <div className="text-black">สถานะล่าสุด:&nbsp;</div>
@@ -223,10 +305,7 @@ const AppLawsTable = () => {
                 {item.status.map((status, idx) => (
                   <div
                     key={idx}
-                    className={`h-4 rounded ${getStatusColor(
-                      status,
-                      item.stage
-                    )}`}
+                    className={`h-4 rounded ${getStatusColor(status)}`}
                   ></div>
                 ))}
               </div>

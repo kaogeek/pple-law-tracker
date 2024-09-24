@@ -1,10 +1,7 @@
 import "./AppContent.css";
 // import AppLawItem from "./AppLawItem.js";
 import AppLawsTable from "./AppLawsTable.js";
-import lawFile from "../assets/law.json"
-
-const lawLists = lawFile;
-console.log(lawLists)
+import ScrollToTopButton from "./ScrollToTopButton";
 
 function AppContent() {
   // const lawElements = lawLists.map((law, index) => {
@@ -13,8 +10,8 @@ function AppContent() {
 
   return (
     <div className="p-4">
-      {/* <div className="text-2xl">สำรวจร่างกฎหมายพรรคประชาชน</div> */}
       <AppLawsTable />
+      <ScrollToTopButton /> {/* Add Scroll to Top Button here */}
     </div>
   );
 }
