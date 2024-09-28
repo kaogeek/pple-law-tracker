@@ -8,8 +8,10 @@ const getStatusColor = (status) => {
       return "bg-yellow-500";
     case 3: // stopped
       return "bg-red-500";
-    case 4:
-      return "bg-white border border-green";
+    // case 4: //skipped
+    //   return "bg-green-500";
+    case 4: //skipped
+      return "bg-white border-2 border-green-500";
     default:
       return "bg-gray-300";
   }

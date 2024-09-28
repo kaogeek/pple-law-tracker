@@ -1,12 +1,9 @@
 import React, { useState, useEffect } from "react";
-import lawFile from "../assets/law.json";
+import { fetchLawsData } from "../utils/api"; // Import the utility function
 import SearchBar from "./SearchBar";
 import FilterButtons from "./FilterButtons";
 import LawTable from "./LawTable";
 import LawCard from "./LawCard"; // Add LawCard component for mobile view
-
-// Sample data with 10 status stages for each item
-const data = lawFile;
 
 // 10 Status Labels
 const statusLabels = [
@@ -41,6 +38,8 @@ const getLawStatus = (statusArray) => {
 };
 
 const AppLawsTable = () => {
+  const [data, setData] = useState([]); // State to hold fetched data
+  const [loading, setLoading] = useState(true); // State to handle loading
   const [searchTerm, setSearchTerm] = useState(""); // State to hold the search input
   const [filter, setFilter] = useState("all"); // State to hold the current filter
   const [counts, setCounts] = useState({
@@ -51,6 +50,24 @@ const AppLawsTable = () => {
   });
 
   useEffect(() => {
+    // Fetch data from API using the utility function
+    const fetchData = async () => {
+      try {
+        const result = await fetchLawsData();
+        setData(result); // Update state with fetched data
+        updateCounts(result); // Update counts based on fetched data
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      } finally {
+        setLoading(false); // Set loading to false once data is fetched or there's an error
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  // Function to update the counts for each filter category
+  const updateCounts = (data) => {
     const allCount = data.length;
     const ongoingCount = data.filter(
       (item) => getLawStatus(item.status) === "ongoing"
@@ -68,7 +85,7 @@ const AppLawsTable = () => {
       stopped: stoppedCount,
       passed: passedCount,
     });
-  }, []);
+  };
 
   const handleFilterChange = (newFilter) => {
     setFilter(newFilter);
@@ -98,36 +115,46 @@ const AppLawsTable = () => {
         </h1>
       </div>
 
-      {/* Search and Filter Section */}
-      <div className="flex flex-col lg:flex-row justify-between items-center py-2 space-y-2 lg:space-y-0 lg:space-x-2">
-        <SearchBar
-          searchTerm={searchTerm}
-          onSearchChange={handleSearchChange}
-        />
-        <FilterButtons
-          counts={counts}
-          filter={filter}
-          onFilterChange={handleFilterChange}
-        />
-      </div> 
+      {/* Show loading indicator while data is being fetched */}
+      {loading ? (
+        <div className="flex flex-col justify-center items-center h-64">
+          <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-pple-orange border-opacity-50"></div>
+          <div className="mt-4 text-xl font-semibold">Loading data...</div>
+        </div>
+      ) : (
+        <>
+          {/* Search and Filter Section */}
+          <div className="flex flex-col lg:flex-row justify-between items-center py-2 space-y-2 lg:space-y-0 lg:space-x-2">
+            <SearchBar
+              searchTerm={searchTerm}
+              onSearchChange={handleSearchChange}
+            />
+            <FilterButtons
+              counts={counts}
+              filter={filter}
+              onFilterChange={handleFilterChange}
+            />
+          </div>
 
-      {/* Table View for Desktop */}
-      <div
-        className="hidden lg:block"
-        style={{
-          maxHeight: "calc(100vh - 200px)", // Adjusted for navbar and header height
-          overflowY: "auto",
-        }}
-      >
-        <LawTable data={filteredData} statusLabels={statusLabels} />
-      </div>
+          {/* Table View for Desktop */}
+          <div
+            className="hidden lg:block"
+            style={{
+              maxHeight: "calc(100vh - 200px)", // Adjusted for navbar and header height
+              overflowY: "auto",
+            }}
+          >
+            <LawTable data={filteredData} statusLabels={statusLabels} />
+          </div>
 
-      {/* Card View for Mobile */}
-      <div className="lg:hidden">
-        {filteredData.map((law) => (
-          <LawCard key={law.no} law={law} statusLabels={statusLabels} />
-        ))}
-      </div>
+          {/* Card View for Mobile */}
+          <div className="lg:hidden">
+            {filteredData.map((law) => (
+              <LawCard key={law.no} law={law} statusLabels={statusLabels} />
+            ))}
+          </div>
+        </>
+      )}
     </div>
   );
 };

@@ -35,10 +35,10 @@ const getStatusText = (status, text) => {
 const LawCard = ({ law, statusLabels }) => {
   const [tooltip, setTooltip] = useState({
     visible: false,
-    content: "ddd",
+    content: "",
     x: 0,
     y: 0,
-    idx: 0
+    idx: 0,
   });
 
   const lastNonZeroIndex = law.status.findLastIndex((status) => status !== 0);
@@ -48,36 +48,43 @@ const LawCard = ({ law, statusLabels }) => {
 
   // Handler for showing the tooltip
   const handleStatusClick = (event, status, idx) => {
-    console.log(status);
-    const { clientX, clientY } = event;
+    const targetRect = event.target.getBoundingClientRect(); // Get element's position
+
+    // Adjust position relative to the parent container or page offset
+    const tooltipX = targetRect.left + window.scrollX;
+    const tooltipY = targetRect.top + window.scrollY + targetRect.height;
+
     setTooltip({
       visible: true,
       content: `สถานะ: ${status}`, // Customize this content as needed
-      x: clientX,
-      y: clientY,
-      idx: idx
+      x: tooltipX,
+      y: tooltipY,
+      idx: idx,
     });
   };
 
   // Handler for hiding the tooltip
   const handleTooltipHide = () => {
-    setTooltip({ visible: false, content: "", x: 0, y: 0, idx: 0});
+    setTooltip({ visible: false, content: "", x: 0, y: 0, idx: 0 });
   };
 
   return (
-    <div key={law.no} className="mb-4 border-b pb-2">
+    <div key={law.no} className="mb-4 border-b pb-2 relative">
       <div>
         <h2 className="text-lg font-semibold">
           {law.title}
-          <a
-            href={law.link}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="ml-2 inline-flex items-center text-blue-500"
-            aria-label="Open document link"
-          >
-            <FaFileAlt size={14} />
-          </a>
+          {law.link && law.link.trim() !== "" && (
+            <a
+              href={law.link}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="ml-2 inline-flex items-center text-blue-500"
+              aria-label="Open document link"
+              title="อ่านร่างกฎหมายที่นี่"
+            >
+              <FaFileAlt size={14} />
+            </a>
+          )}
         </h2>
       </div>
       {law.name && (
@@ -105,8 +112,11 @@ const LawCard = ({ law, statusLabels }) => {
       {/* Tooltip */}
       {tooltip.visible && (
         <div
-          className="absolute bg-black text-black text-s rounded p-10 z-50"
-          style={{ left: tooltip.x, top: tooltip.y }}
+          className="absolute bg-black text-white text-xs rounded p-2 z-50"
+          style={{
+            left: tooltip.idx === 9 ? 200 : tooltip.x, // Conditionally set the left position
+            top: "unset", // Use tooltip.y instead of "unset" for proper positioning
+          }}
         >
           {statusLabels[tooltip.idx]}
         </div>
