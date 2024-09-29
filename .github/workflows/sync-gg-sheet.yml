@@ -15,16 +15,16 @@ jobs:
     steps:
     - name: Checkout 🛎
       uses: actions/checkout@v4
-      
+
     - name: Fetch data 🏃🏻‍♂️
       run: |
-        curl -L -s "https://script.google.com/macros/s/${{ secrets.KEY_APP_SCRIPT }}/exec?action=getData" -o public/laws.json
+        curl -L -s "https://script.google.com/macros/s/${{ secrets.KEY_APP_SCRIPT }}/exec?action=getData" -o public/law.json
 
     - name: Commit and Push Changes
       run: |
         git config --global user.name "github-actions[bot]"
         git config --global user.email "github-actions[bot]@users.noreply.github.com"
-        git add public/laws.json
+        git add public/law.json
         git commit -m "Sync JSON data from Google Apps Script"
         git push origin main
       env:
