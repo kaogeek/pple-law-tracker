@@ -3,7 +3,7 @@
 export const fetchLawsData = async () => {
     try {
       const response = await fetch(
-        "/law.json"
+        "https://raw.githubusercontent.com/kaogeek/pple-law-tracker/refs/heads/main/public/law.json"
       );
       if (!response.ok) {
         throw new Error("Failed to fetch data");
