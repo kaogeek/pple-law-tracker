@@ -2,6 +2,19 @@ import React, { useState } from "react";
 import { FaFileAlt } from "react-icons/fa";
 import { getStatusColor } from "./StatusIcon";
 
+const categoryMap = {
+  economy: "เศรษฐกิจเติบโตอย่างมีคุณภาพ",
+  education: "เรียนรู้ทันโลก",
+  life: "ยกระดับคุณภาพชีวิต",
+  local: "ปลดล็อกชนบทไทย",
+  government: "ปฏิรูปรัฐครั้งใหญ่",
+  democracy: "ประชาธิปไตยเต็มใบ",
+};
+
+const bigbangCategory = (category) => {
+  return categoryMap[category] || "ไม่มีหมวด"; // Default for unknown categories
+};
+
 const getStageColor = (status) => {
   switch (status) {
     case 1:
@@ -91,6 +104,12 @@ const LawCard = ({ law, statusLabels }) => {
         <div className="text-sm flex">
           <div className="text-black">ผู้เสนอ:&nbsp;</div>
           <div className="text-gray-500">{law.name}</div>
+        </div>
+      )}
+      {law.category && (
+        <div className="text-sm flex">
+          <div className="text-black">หมวดหมู่:&nbsp;</div>
+          <div className="text-gray-500">{bigbangCategory(law.category)}</div>
         </div>
       )}
       <div className="text-sm flex">
