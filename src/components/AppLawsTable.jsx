@@ -8,7 +8,7 @@ import LawCard from "./LawCard"; // Add LawCard component for mobile view
 // 10 Status Labels
 const statusLabels = [
   "ยื่นเข้าสภา",
-  "นายกรับรอง (ไม่ใช่ร่างการเงิน)*",
+  "นายกรับรอง (ร่างการเงิน)*",
   "บรรจุวาระ",
   "ครม. ดึงไปศึกษา (ไม่เกิน 60 วัน)*",
   "วาระ 1",
