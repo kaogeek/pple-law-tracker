@@ -67,13 +67,15 @@ const LawRow = ({ law, statusLabels }) => {
         {/* Button to open modal */}
         <td className="px-1 py-2 text-center w-[150px]">
           {law.detail && law.detail.trim() !== "" && (
-            <button
-              onClick={handleOpenModal}
-              className="flex text-blue-600 items-center justify-center gap-x-2.5 p-2 text-sm font-semibold leading-6 text-gray-900 border border-gray-200 rounded-md hover:bg-gray-100 cursor-pointer"
-            >
-              <FaFileAlt size={18} />
-              อ่านสรุป
-            </button>
+            <div className="flex justify-center">
+              <button
+                onClick={handleOpenModal}
+                className="flex text-blue-600 items-center justify-center gap-x-2.5 p-2 text-sm font-semibold leading-6 text-gray-900 border border-gray-200 rounded-md hover:bg-gray-100 cursor-pointer"
+              >
+                <FaFileAlt size={18} />
+                อ่านสรุป
+              </button>
+            </div>
           )}
         </td>
 

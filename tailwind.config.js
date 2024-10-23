@@ -14,7 +14,7 @@ module.exports = {
         'pple-orange': '#ff6a13'
       },
       fontFamily: {
-        pracharatbold: ['"Pracharath-Bold"', 'sans-serif'],
+        pracharatRegular: ['"Pracharath-Regular"', 'sans-serif'],
       },
     },
   },

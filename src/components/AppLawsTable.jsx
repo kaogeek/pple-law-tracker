@@ -135,6 +135,21 @@ const AppLawsTable = () => {
               onFilterChange={handleFilterChange}
             />
           </div>
+          
+          <div className="hidden lg:flex flex justify-end py-2 items-center">
+            <div className={`h-4 w-[50px] rounded-3xl bg-green-500 mx-2`}></div>
+            <div>ผ่าน</div>
+            <div
+              className={`h-4 w-[50px] rounded-3xl bg-yellow-500 mx-2`}
+            ></div>
+            <div>ดำเนินการ</div>
+            <div
+              className={`h-4 w-[50px] rounded-3xl bg-white border-2 border-green-500 mx-2`}
+            ></div>
+            <div>ไม่ถูกดึงไปพิจารณา</div>
+            <div className={`h-4 w-[50px] rounded-3xl bg-red-500 mx-2`}></div>
+            <div>ระงับ/ปัดตก</div>
+          </div>
 
           {/* Table View for Desktop */}
           <div
