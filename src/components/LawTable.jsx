@@ -8,6 +8,7 @@ const LawTable = ({ data, statusLabels }) => {
       <thead className="bg-gray-100 sticky top-0 z-20">
         <tr>
           <th className="px-4 py-2 w-[600px] text-sm">หัวข้อ</th>
+          <th className="px-4 py-2 w-[150px] text-sm">สรุปร่างกฎหมาย</th>
           {statusLabels.map((label, index) => (
             <StatusLabel key={index} label={label} />
           ))}
