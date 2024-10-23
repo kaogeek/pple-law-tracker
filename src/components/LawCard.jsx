@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { FaFileAlt } from "react-icons/fa";
+import { IoDocumentAttach } from "react-icons/io5";
 import { getStatusColor } from "./StatusIcon";
 
 const categoryMap = {
@@ -54,6 +55,11 @@ const LawCard = ({ law, statusLabels }) => {
     idx: 0,
   });
 
+  // Check if law.link is valid (non-empty string after trim)
+  const isLinkValid = law.link && law.link.trim() !== "";
+
+  const [isModalOpen, setIsModalOpen] = useState(false); // State for handling modal
+
   const lastNonZeroIndex = law.status.findLastIndex((status) => status !== 0);
   const lastStatusLabel =
     lastNonZeroIndex !== -1 ? statusLabels[lastNonZeroIndex] : "Unknown Status";
@@ -81,66 +87,156 @@ const LawCard = ({ law, statusLabels }) => {
     setTooltip({ visible: false, content: "", x: 0, y: 0, idx: 0 });
   };
 
+  // Handler to open the modal
+  const handleOpenModal = () => {
+    setIsModalOpen(true);
+  };
+
+  // Handler to close the modal
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+  };
+
   return (
-    <div key={law.no} className="mb-4 border-b pb-2 relative">
-      <div>
-        <h2 className="text-lg font-semibold">
-          {law.title}
-          {law.link && law.link.trim() !== "" && (
-            <a
-              href={law.link}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="ml-2 inline-flex items-center text-blue-500"
-              aria-label="Open document link"
-              title="อ่านร่างกฎหมายที่นี่"
-            >
-              <FaFileAlt size={14} />
-            </a>
-          )}
-        </h2>
-      </div>
-      {law.name && (
+    <>
+      <div key={law.no} className="mb-4 border-b pb-2 relative">
+        <div>
+          <h2 className="text-lg font-semibold">
+            {law.title}
+            {law.link && law.link.trim() !== "" && (
+              <a
+                href={law.link}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="ml-2 inline-flex items-center text-blue-500"
+                aria-label="Open document link"
+                title="อ่านร่างกฎหมายที่นี่"
+              >
+                {/* <FaFileAlt size={14} /> */}
+              </a>
+            )}
+          </h2>
+        </div>
+        <div className="grid grid-cols-2 divide-x rounded-md bg-gray-50 my-2">
+          {/* Full document link */}
+          <a
+            href={isLinkValid ? law.link : "#"}
+            target={isLinkValid ? "_blank" : "_self"}
+            rel="noopener noreferrer"
+            className={`flex text-blue-600 items-center justify-center gap-x-2.5 p-2 text-sm font-semibold leading-6 ${
+              isLinkValid
+                ? "text-gray-900 hover:bg-gray-100"
+                : "text-gray-400 cursor-not-allowed"
+            }`}
+            onClick={(e) => {
+              if (!isLinkValid) {
+                e.preventDefault(); // Prevent navigation if the link is invalid
+              }
+            }}
+          >
+            <IoDocumentAttach size={18} />
+            ร่างฉบับเต็ม
+          </a>
+
+          {/* Summary version link */}
+          <button
+            onClick={handleOpenModal}
+            className="flex text-blue-600 items-center justify-center gap-x-2.5 p-2 text-sm font-semibold leading-6 text-gray-900 hover:bg-gray-100 cursor-pointer"
+          >
+            <FaFileAlt size={18} />
+            สรุปร่างฉบับนี้
+          </button>
+        </div>
+        {law.name && (
+          <div className="text-sm flex">
+            <div className="text-black">ผู้เสนอ:&nbsp;</div>
+            <div className="text-gray-500">{law.name}</div>
+          </div>
+        )}
+        {law.category && (
+          <div className="text-sm flex">
+            <div className="text-black">หมวดหมู่:&nbsp;</div>
+            <div className="text-gray-500">{bigbangCategory(law.category)}</div>
+          </div>
+        )}
         <div className="text-sm flex">
-          <div className="text-black">ผู้เสนอ:&nbsp;</div>
-          <div className="text-gray-500">{law.name}</div>
+          <div className="text-black">สถานะล่าสุด:&nbsp;</div>
+          <div className={getStageColor(lastStage)}>
+            {getStatusText(lastStage, lastStatusLabel)}
+          </div>
         </div>
-      )}
-      {law.category && (
-        <div className="text-sm flex">
-          <div className="text-black">หมวดหมู่:&nbsp;</div>
-          <div className="text-gray-500">{bigbangCategory(law.category)}</div>
+
+        <div className="grid grid-cols-10 gap-1 mt-2 mb-2">
+          {law.status.map((status, idx) => (
+            <div
+              key={idx}
+              className={`h-4 rounded cursor-pointer ${getStatusColor(status)}`}
+              onClick={(e) => handleStatusClick(e, status, idx)} // Show tooltip on click
+              onMouseLeave={handleTooltipHide} // Hide tooltip on mouse leave
+            ></div>
+          ))}
         </div>
-      )}
-      <div className="text-sm flex">
-        <div className="text-black">สถานะล่าสุด:&nbsp;</div>
-        <div className={getStageColor(lastStage)}>
-          {getStatusText(lastStage, lastStatusLabel)}
-        </div>
-      </div>
-      <div className="grid grid-cols-10 gap-1 mt-2 mb-2">
-        {law.status.map((status, idx) => (
+
+        {/* Tooltip */}
+        {tooltip.visible && (
           <div
-            key={idx}
-            className={`h-4 rounded cursor-pointer ${getStatusColor(status)}`}
-            onClick={(e) => handleStatusClick(e, status, idx)} // Show tooltip on click
-            onMouseLeave={handleTooltipHide} // Hide tooltip on mouse leave
-          ></div>
-        ))}
+            className="absolute bg-black text-white text-xs rounded p-2 z-50"
+            style={{
+              left: tooltip.idx === 9 ? 200 : tooltip.x, // Conditionally set the left position
+              top: "unset", // Use tooltip.y instead of "unset" for proper positioning
+            }}
+          >
+            {statusLabels[tooltip.idx]}
+          </div>
+        )}
       </div>
-      {/* Tooltip */}
-      {tooltip.visible && (
-        <div
-          className="absolute bg-black text-white text-xs rounded p-2 z-50"
-          style={{
-            left: tooltip.idx === 9 ? 200 : tooltip.x, // Conditionally set the left position
-            top: "unset", // Use tooltip.y instead of "unset" for proper positioning
-          }}
-        >
-          {statusLabels[tooltip.idx]}
+
+      {/* Modal */}
+      {isModalOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+          {/* This container ensures that the modal content is scrollable */}
+          <div className="bg-white w-11/12 max-w-lg rounded-lg shadow-lg p-6 relative overflow-hidden max-h-full">
+            {/* Scrollable modal content */}
+            <div className="overflow-y-auto max-h-[80vh]">
+              <div className="text-right">
+                <button
+                  className="text-gray-500 hover:text-gray-800"
+                  onClick={handleCloseModal}
+                >
+                  ✖
+                </button>
+              </div>
+              <div className="text-gray-800">
+                <h3 className="text-xl font-bold mb-4">รายละเอียดเพิ่มเติม</h3>
+
+                <div className="text-gray-700 text-sm mb-4">
+                  <div className="font-bold">ปัญหาและที่มา</div>
+                  <p className="mb-2">
+                    {/* Replace this with real content */}
+                    {law.detail}
+                  </p>
+                  <div className="font-bold">แนวทางการแก้ไข</div>
+                  <p style={{ whiteSpace: "pre-line" }}>
+                    {/* Replace this with real content */}
+                    {law.solution}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Close button at the bottom */}
+            <div className="text-right mt-4">
+              <button
+                className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
+                onClick={handleCloseModal}
+              >
+                ปิด
+              </button>
+            </div>
+          </div>
         </div>
       )}
-    </div>
+    </>
   );
 };
 
