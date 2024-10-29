@@ -155,7 +155,7 @@ const AppLawsTable = () => {
           <div
             className="hidden lg:block"
             style={{
-              maxHeight: "calc(100vh - 200px)", // Adjusted for navbar and header height
+              maxHeight: "calc(100vh - 245px)", // Adjusted for navbar and header height
               overflowY: "auto",
             }}
           >
