@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { fetchLawsDataNoco } from "../utils/api"; // Import the utility function
+import { fetchLawsData, fetchLawsDataNoco } from "../utils/api"; // Import the utility function
 import SearchBar from "./SearchBar";
 import FilterButtons from "./FilterButtons";
 import LawTable from "./LawTable";
@@ -19,41 +19,22 @@ const statusLabels = [
   "ลงนามพระปรมาภิไธย/ประกาศใช้",
 ];
 
-// Function to get the status type based on the status values
-const getLawStatus = (law) => {
-  const statusMap = {
-    "ยื่นเข้าสภา": 0,
-    "นายกรับรอง": 1,
-    "บรรจุวาระ": 2,
-    "ครม. ดึงไปศึกษา": 3,
-    "วาระ 1": 4,
-    "ศึกษาใน กมธ.": 5,
-    "วาระ 2": 6,
-    "วาระ 3": 7,
-    "ผ่าน สว": 8,
-    "ลงนามพระปรมา": 9
-  };
+// Function to get the status type based on the last non-zero value in the array
+const getLawStatus = (statusArray) => {
+  const lastNonZeroIndex = statusArray.findLastIndex((status) => status !== 0);
+  const lastStatus = statusArray[lastNonZeroIndex];
 
-  const statusValues = Object.entries(statusMap).map(([key, index]) => {
-    const value = law[key];
-    if (value === "done") return 1;
-    if (value === "working") return 2;
-    if (value === "skipped") return 4;
-    if (value === "paused") return 3;
-    return 0;
-  });
-
-  const lastNonZeroIndex = statusValues.findLastIndex((status) => status !== 0);
-  const lastStatus = statusValues[lastNonZeroIndex];
-
-  if (lastStatus === 2 || (lastStatus === 1 && lastNonZeroIndex !== statusValues.length - 1)) {
-    return "ongoing";
+  if (
+    lastStatus === 2 ||
+    (lastStatus === 1 && lastNonZeroIndex !== statusArray.length - 1)
+  ) {
+    return "ongoing"; // Law is ongoing
   } else if (lastStatus === 3) {
-    return "stopped";
-  } else if (lastStatus === 1 && lastNonZeroIndex === statusValues.length - 1) {
-    return "passed";
+    return "stopped"; // Law is stopped
+  } else if (lastStatus === 1 && lastNonZeroIndex === statusArray.length - 1) {
+    return "passed"; // Law is passed
   }
-  return "other";
+  return "other"; // For any other cases
 };
 
 const AppLawsTable = () => {
@@ -72,9 +53,9 @@ const AppLawsTable = () => {
     // Fetch data from API using the utility function
     const fetchData = async () => {
       try {
-        const result = await fetchLawsDataNoco();
-        setData(result);
-        updateCounts(result);
+        const result = await fetchLawsData();
+        setData(result); // Update state with fetched data
+        updateCounts(result); // Update counts based on fetched data
       } catch (error) {
         console.error("Error fetching data:", error);
       } finally {
@@ -82,15 +63,33 @@ const AppLawsTable = () => {
       }
     };
 
+    const fetchDataNoco = async () => {
+      try {
+        const result = await fetchLawsDataNoco();
+        console.log(result.list);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      } finally {
+        setLoading(false); // Set loading to false once data is fetched or there's an error
+      }
+    };
+
+    fetchDataNoco();
     fetchData();
   }, []);
 
   // Function to update the counts for each filter category
   const updateCounts = (data) => {
     const allCount = data.length;
-    const ongoingCount = data.filter((item) => getLawStatus(item) === "ongoing").length;
-    const stoppedCount = data.filter((item) => getLawStatus(item) === "stopped").length;
-    const passedCount = data.filter((item) => getLawStatus(item) === "passed").length;
+    const ongoingCount = data.filter(
+      (item) => getLawStatus(item.status) === "ongoing"
+    ).length;
+    const stoppedCount = data.filter(
+      (item) => getLawStatus(item.status) === "stopped"
+    ).length;
+    const passedCount = data.filter(
+      (item) => getLawStatus(item.status) === "passed"
+    ).length;
 
     setCounts({
       all: allCount,
@@ -110,14 +109,14 @@ const AppLawsTable = () => {
 
   const filteredData = data
     .filter((item) =>
-      item.ชื่อร่าง.toLowerCase().includes(searchTerm.toLowerCase())
+      item.title.toLowerCase().includes(searchTerm.toLowerCase())
     )
     .filter((item) => {
       if (filter === "all") return true; // Show all if filter is 'all'
-      const lawStatus = getLawStatus(item);
+      const lawStatus = getLawStatus(item.status);
       return lawStatus === filter;
     })
-    .sort((a, b) => a.ชื่อร่าง.localeCompare(b.ชื่อร่าง, "th"));
+    .sort((a, b) => a.title.localeCompare(b.title, "th"));
 
   return (
     <div>
@@ -178,7 +177,7 @@ const AppLawsTable = () => {
           {/* Card View for Mobile */}
           <div className="lg:hidden">
             {filteredData.map((law) => (
-              <LawCard key={law.Id} law={law} statusLabels={statusLabels} />
+              <LawCard key={law.no} law={law} statusLabels={statusLabels} />
             ))}
           </div>
         </>
