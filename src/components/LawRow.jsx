@@ -16,6 +16,14 @@ const bigbangCategory = (category) => {
   return categoryMap[category] || "ไม่มีหมวด"; // Default for unknown categories
 };
 
+const getStatusValue = (status) => {
+  if (status === "done") return 1;
+  if (status === "working") return 2;
+  if (status === "paused") return 3;
+  if (status === "skipped") return 4;
+  return 0;
+};
+
 const LawRow = ({ law, statusLabels }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -29,15 +37,29 @@ const LawRow = ({ law, statusLabels }) => {
     setIsModalOpen(false);
   };
 
+  // Convert status fields to array
+  const statusArray = [
+    getStatusValue(law["ยื่นเข้าสภา"]),
+    getStatusValue(law["นายกรับรอง"]),
+    getStatusValue(law["บรรจุวาระ"]),
+    getStatusValue(law["ครม. ดึงไปศึกษา"]),
+    getStatusValue(law["วาระ 1"]),
+    getStatusValue(law["ศึกษาใน กมธ."]),
+    getStatusValue(law["วาระ 2"]),
+    getStatusValue(law["วาระ 3"]),
+    getStatusValue(law["ผ่าน สว"]),
+    getStatusValue(law["ลงนามพระปรมา"])
+  ];
+
   return (
     <>
-      <tr key={law.no} className="bg-white border-b">
+      <tr key={law.Id} className="bg-white border-b">
         <td className="px-4 py-2">
           <div className="font-bold">
-            {law.title}
-            {law.link && law.link.trim() !== "" && (
+            {law.ชื่อร่าง}
+            {law.ตัวอย่างร่าง && law.ตัวอย่างร่าง.trim() !== "" && (
               <a
-                href={law.link}
+                href={law.ตัวอย่างร่าง}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="ml-2 inline-flex items-center text-blue-500"
@@ -48,17 +70,17 @@ const LawRow = ({ law, statusLabels }) => {
               </a>
             )}
           </div>
-          {law.name && (
+          {law.ผู้เสนอ && (
             <div className="text-sm flex">
               <div className="text-black">ผู้เสนอ:&nbsp;</div>
-              <div className="text-gray-500">{law.name}</div>
+              <div className="text-gray-500">{law.ผู้เสนอ}</div>
             </div>
           )}
-          {law.category && (
+          {law.ประเภท && (
             <div className="text-sm flex">
               <div className="text-black">หมวดหมู่:&nbsp;</div>
               <div className="text-gray-500">
-                {bigbangCategory(law.category)}
+                {bigbangCategory(law.ประเภท)}
               </div>
             </div>
           )}
@@ -66,11 +88,11 @@ const LawRow = ({ law, statusLabels }) => {
 
         {/* Button to open modal */}
         <td className="px-1 py-2 text-center w-[150px]">
-          {law.detail && law.detail.trim() !== "" && (
+          {law.รายละเอียด && law.รายละเอียด.trim() !== "" && (
             <div className="flex justify-center">
               <button
                 onClick={handleOpenModal}
-                className="flex text-blue-600 items-center justify-center gap-x-2.5 p-2 text-sm font-semibold leading-6 text-gray-900 border border-gray-200 rounded-md hover:bg-gray-100 cursor-pointer"
+                className="flex items-center justify-center gap-x-2.5 p-2 text-sm font-semibold leading-6 text-gray-900 border border-gray-200 rounded-md hover:bg-gray-100 cursor-pointer"
               >
                 <FaFileAlt size={18} />
                 อ่านสรุป
@@ -79,7 +101,7 @@ const LawRow = ({ law, statusLabels }) => {
           )}
         </td>
 
-        {law.status.map((status, idx) => (
+        {statusArray.map((status, idx) => (
           <td key={idx} className="px-1 py-2 text-center w-[100px]">
             <StatusIcon status={status} />
           </td>
@@ -106,13 +128,11 @@ const LawRow = ({ law, statusLabels }) => {
                 <div className="text-gray-700 text-sm mb-4">
                   <div className="font-bold">ปัญหาและที่มา</div>
                   <p className="mb-2">
-                    {/* Replace this with real content */}
-                    {law.detail}
+                    {law.รายละเอียด}
                   </p>
                   <div className="font-bold">แนวทางการแก้ไข</div>
                   <p style={{ whiteSpace: "pre-line" }}>
-                    {/* Replace this with real content */}
-                    {law.solution}
+                    {law.แนวทาง}
                   </p>
                 </div>
               </div>

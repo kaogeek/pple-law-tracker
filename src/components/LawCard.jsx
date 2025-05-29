@@ -16,6 +16,14 @@ const bigbangCategory = (category) => {
   return categoryMap[category] || "ไม่มีหมวด"; // Default for unknown categories
 };
 
+const getStatusValue = (status) => {
+  if (status === "done") return 1;
+  if (status === "working") return 2;
+  if (status === "paused") return 3;
+  if (status === "skipped") return 4;
+  return 0;
+};
+
 const getStageColor = (status) => {
   switch (status) {
     case 1:
@@ -55,15 +63,29 @@ const LawCard = ({ law, statusLabels }) => {
     idx: 0,
   });
 
+  // Convert status fields to array
+  const statusArray = [
+    getStatusValue(law["ยื่นเข้าสภา"]),
+    getStatusValue(law["นายกรับรอง"]),
+    getStatusValue(law["บรรจุวาระ"]),
+    getStatusValue(law["ครม. ดึงไปศึกษา"]),
+    getStatusValue(law["วาระ 1"]),
+    getStatusValue(law["ศึกษาใน กมธ."]),
+    getStatusValue(law["วาระ 2"]),
+    getStatusValue(law["วาระ 3"]),
+    getStatusValue(law["ผ่าน สว"]),
+    getStatusValue(law["ลงนามพระปรมา"])
+  ];
+
   // Check if law.link is valid (non-empty string after trim)
-  const isLinkValid = law.link && law.link.trim() !== "";
+  const isLinkValid = law.ตัวอย่างร่าง && law.ตัวอย่างร่าง.trim() !== "";
 
   const [isModalOpen, setIsModalOpen] = useState(false); // State for handling modal
 
-  const lastNonZeroIndex = law.status.findLastIndex((status) => status !== 0);
+  const lastNonZeroIndex = statusArray.findLastIndex((status) => status !== 0);
   const lastStatusLabel =
     lastNonZeroIndex !== -1 ? statusLabels[lastNonZeroIndex] : "Unknown Status";
-  const lastStage = law.status[lastNonZeroIndex];
+  const lastStage = statusArray[lastNonZeroIndex];
 
   // Handler for showing the tooltip
   const handleStatusClick = (event, status, idx) => {
@@ -99,20 +121,20 @@ const LawCard = ({ law, statusLabels }) => {
 
   return (
     <>
-      <div key={law.no} className="mb-4 border-b pb-2 relative">
+      <div key={law.Id} className="mb-4 border-b pb-2 relative">
         <div>
           <h2 className="text-lg font-semibold">
-            {law.title}
-            {law.link && law.link.trim() !== "" && (
+            {law.ชื่อร่าง}
+            {law.ตัวอย่างร่าง && law.ตัวอย่างร่าง.trim() !== "" && (
               <a
-                href={law.link}
+                href={law.ตัวอย่างร่าง}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="ml-2 inline-flex items-center text-blue-500"
                 aria-label="Open document link"
                 title="อ่านร่างกฎหมายที่นี่"
               >
-                {/* <FaFileAlt size={14} /> */}
+                <IoDocumentAttach size={14} />
               </a>
             )}
           </h2>
@@ -120,7 +142,7 @@ const LawCard = ({ law, statusLabels }) => {
         <div className="grid grid-cols-2 divide-x rounded-md bg-gray-50 my-2">
           {/* Full document link */}
           <a
-            href={isLinkValid ? law.link : "#"}
+            href={isLinkValid ? law.ตัวอย่างร่าง : "#"}
             target={isLinkValid ? "_blank" : "_self"}
             rel="noopener noreferrer"
             className={`flex text-blue-600 items-center justify-center gap-x-2.5 p-2 text-sm font-semibold leading-6 ${
@@ -147,16 +169,16 @@ const LawCard = ({ law, statusLabels }) => {
             สรุปร่างฉบับนี้
           </button>
         </div>
-        {law.name && (
+        {law.ผู้เสนอ && (
           <div className="text-sm flex">
             <div className="text-black">ผู้เสนอ:&nbsp;</div>
-            <div className="text-gray-500">{law.name}</div>
+            <div className="text-gray-500">{law.ผู้เสนอ}</div>
           </div>
         )}
-        {law.category && (
+        {law.ประเภท && (
           <div className="text-sm flex">
             <div className="text-black">หมวดหมู่:&nbsp;</div>
-            <div className="text-gray-500">{bigbangCategory(law.category)}</div>
+            <div className="text-gray-500">{bigbangCategory(law.ประเภท)}</div>
           </div>
         )}
         <div className="text-sm flex">
@@ -167,7 +189,7 @@ const LawCard = ({ law, statusLabels }) => {
         </div>
 
         <div className="grid grid-cols-10 gap-1 mt-2 mb-2">
-          {law.status.map((status, idx) => (
+          {statusArray.map((status, idx) => (
             <div
               key={idx}
               className={`h-4 rounded cursor-pointer ${getStatusColor(status)}`}
@@ -212,13 +234,11 @@ const LawCard = ({ law, statusLabels }) => {
                 <div className="text-gray-700 text-sm mb-4">
                   <div className="font-bold">ปัญหาและที่มา</div>
                   <p className="mb-2">
-                    {/* Replace this with real content */}
-                    {law.detail}
+                    {law.รายละเอียด}
                   </p>
                   <div className="font-bold">แนวทางการแก้ไข</div>
                   <p style={{ whiteSpace: "pre-line" }}>
-                    {/* Replace this with real content */}
-                    {law.solution}
+                    {law.แนวทาง}
                   </p>
                 </div>
               </div>
