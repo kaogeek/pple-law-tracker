@@ -29,8 +29,8 @@ function LocalLawsTable() {
         return 'bg-green-500';
       case 'working':
         return 'bg-yellow-500';
-      case 'undefined':
-        return 'bg-gray-300';
+      case 'paused':
+        return 'bg-red-500';
       default:
         return 'bg-gray-300';
     }
@@ -59,7 +59,7 @@ function LocalLawsTable() {
       <table className="min-w-full bg-white border border-gray-200">
         <thead>
           <tr className="bg-gray-100">
-            <th className="px-6 py-3 border-b text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ชื่อกฎหมาย</th>
+            <th className="px-6 py-3 border-b text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-64">ชื่อกฎหมาย</th>
             <th className="px-6 py-3 border-b text-left text-xs font-medium text-gray-500 uppercase tracking-wider">จังหวัด</th>
             <th className="px-6 py-3 border-b text-left text-xs font-medium text-gray-500 uppercase tracking-wider">องค์กรปกครองส่วนท้องถิ่น</th>
             <th className="px-6 py-3 border-b text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ตัวอย่างกฎหมาย</th>
@@ -73,8 +73,8 @@ function LocalLawsTable() {
         <tbody className="divide-y divide-gray-200">
           {laws.map((law, index) => (
             <tr key={law.Id || index} className="hover:bg-gray-50">
-              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                <div className="font-medium text-gray-900">{law['ชื่อข้อบัญญัติ']}</div>
+              <td className="px-6 py-4 text-sm text-gray-900">
+                <div className="font-medium text-gray-900 break-words">{law['ชื่อข้อบัญญัติ']}</div>
                 {law['ผู้เสนอ'] && (
                   <div className="text-xs text-gray-500 mt-1">ผู้เสนอ: {law['ผู้เสนอ']}</div>
                 )}
@@ -122,4 +122,4 @@ function LocalLawsTable() {
   );
 }
 
-export default LocalLawsTable; 
+export default LocalLawsTable;
