@@ -110,14 +110,18 @@ const AppLawsTable = () => {
 
   const filteredData = data
     .filter((item) =>
-      item.ชื่อร่าง.toLowerCase().includes(searchTerm.toLowerCase())
+      item.ชื่อร่าง && item.ชื่อร่าง.toLowerCase().includes(searchTerm.toLowerCase())
     )
     .filter((item) => {
       if (filter === "all") return true; // Show all if filter is 'all'
       const lawStatus = getLawStatus(item);
       return lawStatus === filter;
     })
-    .sort((a, b) => a.ชื่อร่าง.localeCompare(b.ชื่อร่าง, "th"));
+    .sort((a, b) => {
+      const nameA = a.ชื่อร่าง || '';
+      const nameB = b.ชื่อร่าง || '';
+      return nameA.localeCompare(nameB, "th");
+    });
 
   return (
     <div>
@@ -149,7 +153,7 @@ const AppLawsTable = () => {
             />
           </div>
           
-          <div className="hidden lg:flex flex justify-end py-2 items-center">
+          <div className="hidden lg:flex justify-end py-2 items-center">
             <div className={`h-4 w-[50px] rounded-3xl bg-green-500 mx-2`}></div>
             <div>ผ่าน</div>
             <div
