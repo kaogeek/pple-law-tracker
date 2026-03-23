@@ -4,6 +4,7 @@ import SearchBar from "./SearchBar";
 import FilterButtons from "./FilterButtons";
 import LawTable from "./LawTable";
 import LawCard from "./LawCard"; // Add LawCard component for mobile view
+import PendingLawsSection from "./PendingLawsSection";
 
 // 10 Status Labels
 const statusLabels = [
@@ -57,10 +58,11 @@ const getLawStatus = (law) => {
 };
 
 const AppLawsTable = () => {
-  const [data, setData] = useState([]); // State to hold fetched data
-  const [loading, setLoading] = useState(true); // State to handle loading
-  const [searchTerm, setSearchTerm] = useState(""); // State to hold the search input
-  const [filter, setFilter] = useState("all"); // State to hold the current filter
+  const [currentData, setCurrentData] = useState([]); // ชุดที่ 27
+  const [pendingData, setPendingData] = useState([]); // ชุดที่ 26
+  const [loading, setLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filter, setFilter] = useState("all");
   const [counts, setCounts] = useState({
     all: 0,
     ongoing: 0,
@@ -69,23 +71,25 @@ const AppLawsTable = () => {
   });
 
   useEffect(() => {
-    // Fetch data from API using the utility function
     const fetchData = async () => {
       try {
         const result = await fetchLawsDataNoco();
-        setData(result);
-        updateCounts(result);
+        const set27 = result.filter((item) => item["ชุดที่"] === "27");
+        const set26 = result.filter((item) => item["ชุดที่"] === "26");
+        setCurrentData(set27);
+        setPendingData(set26);
+        updateCounts(set27);
       } catch (error) {
         console.error("Error fetching data:", error);
       } finally {
-        setLoading(false); // Set loading to false once data is fetched or there's an error
+        setLoading(false);
       }
     };
 
     fetchData();
   }, []);
 
-  // Function to update the counts for each filter category
+  // Function to update the counts for each filter category (ชุดที่ 27 only)
   const updateCounts = (data) => {
     const allCount = data.length;
     const ongoingCount = data.filter((item) => getLawStatus(item) === "ongoing").length;
@@ -108,12 +112,12 @@ const AppLawsTable = () => {
     setSearchTerm(newSearchTerm);
   };
 
-  const filteredData = data
+  const filteredData = currentData
     .filter((item) =>
       item.ชื่อร่าง && item.ชื่อร่าง.toLowerCase().includes(searchTerm.toLowerCase())
     )
     .filter((item) => {
-      if (filter === "all") return true; // Show all if filter is 'all'
+      if (filter === "all") return true;
       const lawStatus = getLawStatus(item);
       return lawStatus === filter;
     })
@@ -185,6 +189,9 @@ const AppLawsTable = () => {
               <LawCard key={law.Id} law={law} statusLabels={statusLabels} />
             ))}
           </div>
+
+          {/* Pending laws from สภาชุดที่ 26 */}
+          <PendingLawsSection laws={pendingData} />
         </>
       )}
     </div>

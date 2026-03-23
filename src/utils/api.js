@@ -18,9 +18,10 @@ export const fetchLawsData = async () => {
 
 export const fetchLawsDataNoco = async () => {
   try {
+    const cacheBuster = Date.now();
     const response = await fetch(
-      // "/law-noco.json"
-      "https://storage.googleapis.com/pple-media/promise-tracker/national.json"
+      `https://storage.googleapis.com/pple-media/promise-tracker/national.json?ts=${cacheBuster}`,
+      { cache: "no-store" }
     );
     if (!response.ok) {
       throw new Error("Failed to fetch data");
